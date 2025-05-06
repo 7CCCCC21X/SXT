@@ -2,65 +2,24 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>GigaClaim 空投资格批量查询</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; color: #333; padding: 20px; }
-    h1 { text-align: center; }
-    textarea { width: 100%; height: 120px; margin-bottom: 10px; padding: 10px; font-size: 14px; }
-    button { padding: 8px 16px; margin-bottom: 10px; cursor: pointer; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 14px; }
-    th { background: #eee; }
-    .eligible { color: green; font-weight: bold; }
-    .ineligible { color: red; }
-    .loading { color: #888; }
-    .footer { text-align: center; margin-top: 30px; font-size: 14px; }
-    .footer a { color: #0066cc; text-decoration: none; }
-  </style>
+  <title>GigaClaim 批量查询</title>
 </head>
 <body>
-  <h1>GigaClaim 空投资格批量查询</h1>
-  <textarea id="addressInput" placeholder="每行一个地址"></textarea><br>
-  <button onclick="checkEligibility()">查询</button>
-
-  <table id="resultTable">
-    <thead>
-      <tr>
-        <th>地址</th>
-        <th>是否有资格</th>
-        <th>可领取数量</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <div class="footer">
-    作者推特：<a href="https://twitter.com/0xXIAOc" target="_blank">@0xXIAOc</a>
-  </div>
+  <h1>GigaClaim 批量查询工具</h1>
+  <textarea id="input" rows="10" cols="50" placeholder="每行一个钱包地址"></textarea><br>
+  <button onclick="query()">开始查询</button>
+  <div id="result"></div>
 
   <script>
-    async function checkEligibility() {
-      const input = document.getElementById('addressInput').value.trim();
-      const addresses = input.split('\n').map(addr => addr.trim()).filter(a => /^0x[a-fA-F0-9]{40}$/.test(a));
-      const tbody = document.querySelector('#resultTable tbody');
-      tbody.innerHTML = '';
+    async function query() {
+      const addresses = document.getElementById('input').value.trim().split('\n');
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '查询中...<br>';
 
-      for (const addr of addresses) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${addr}</td><td class="loading">查询中...</td><td class="loading">-</td>`;
-        tbody.appendChild(row);
-        try {
-const res = await fetch(`/api/proxy?address=${addr}`);
-          if (!res.ok) throw new Error();
-          const data = await res.json();
-          row.cells[1].innerHTML = data.isEligible
-            ? '<span class="eligible">✅ 是</span>'
-            : '<span class="ineligible">❌ 否</span>';
-          row.cells[2].innerText = data.totalAmount;
-        } catch (e) {
-          row.cells[1].innerHTML = '<span class="ineligible">查询失败</span>';
-          row.cells[2].innerText = '-';
-        }
+      for (const address of addresses) {
+        const res = await fetch(`/api/proxy?address=${address}`);
+        const data = await res.json();
+        resultDiv.innerHTML += `<p><b>${address}</b> => ${JSON.stringify(data)}</p>`;
       }
     }
   </script>
