@@ -39,8 +39,6 @@
   </div>
 
   <script>
-    const API_BASE = "https://sxt-cio6ohl41-7ccccc21xs-projects.vercel.app";
-
     async function checkEligibility() {
       const input = document.getElementById('addressInput').value.trim();
       const addresses = input.split('\n').map(addr => addr.trim()).filter(a => /^0x[a-fA-F0-9]{40}$/.test(a));
@@ -52,7 +50,7 @@
         row.innerHTML = `<td>${addr}</td><td class="loading">查询中...</td><td class="loading">-</td>`;
         tbody.appendChild(row);
         try {
-          const res = await fetch(`${API_BASE}/api/proxy?address=${addr}`);
+const res = await fetch(`/api/proxy?address=${addr}`);
           if (!res.ok) throw new Error();
           const data = await res.json();
           row.cells[1].innerHTML = data.isEligible
