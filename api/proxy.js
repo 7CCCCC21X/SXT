@@ -14,22 +14,22 @@ export default async function handler(req, res) {
         'Referer': 'https://gigaclaim.spaceandtime.io/',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
         'Accept': 'application/json, text/plain, */*',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'en-US,en;q=0.9',
         'x-kl-saas-ajax-request': 'Ajax_Request'
       }
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+    const body = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: 'Target fetch failed', detail: data });
+      return res.status(response.status).json({ error: 'Target fetch failed', detail: body });
     }
 
-    return res.status(200).json(data);
+    return res.status(200).json({ data: body });
 
   } catch (err) {
-    console.error('Proxy error:', err);  // ✅ Vercel 日志会看到
+    console.error('❌ Proxy error:', err);
     res.status(500).json({ error: 'Server crashed', message: err.message });
   }
 }
