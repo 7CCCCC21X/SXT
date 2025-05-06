@@ -1,28 +1,14 @@
-import { fetch } from 'undici';
-
+// api/proxy.js
 export default async function handler(req, res) {
   const { address } = req.query;
-
-  if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
-    return res.status(400).json({ error: 'Invalid address' });
-  }
+  if (!address) return res.status(400).json({ error: 'Missing address' });
 
   try {
-    const response = await fetch(`https://gigaclaim.spaceandtime.io/api/eligibility?address=${address}`, {
-      headers: {
-        'accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      return res.status(response.status).json({ error: `Upstream error: ${response.status}` });
-    }
-
-    const data = await response.json();
+    const r = await fetch(`https://gigaclaim.spaceandtime.io/api/eligibility?address=${address}`);
+    const data = await r.json();
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(data);
-  } catch (err) {
-    console.error('Proxy error:', err);
-    res.status(500).json({ error: 'Proxy failed', details: err.message });
+  } catch (e) {
+    res.status(500).json({ error: 'Proxy request failed' });
   }
 }
